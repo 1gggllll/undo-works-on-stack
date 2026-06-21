@@ -34,6 +34,7 @@ build/
 *.tmp
 *.temp
 
-# AI 指导手册和 Git 操作手册（不需要提交）
+# AI 指导手册、Git 操作手册和项目开发手册（不需要提交）
 agent.txt
 git操作手册.txt
+项目开发手册.txt
