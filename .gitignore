@@ -1,0 +1,39 @@
+# 依赖目录
+node_modules/
+
+# 数据库文件
+todos.db
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 日志文件
+*.log
+npm-debug.log*
+
+# 操作系统生成的文件
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# IDE 和编辑器文件
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 编译输出
+dist/
+build/
+
+# 临时文件
+*.tmp
+*.temp
+
+# AI 指导手册和 Git 操作手册（不需要提交）
+agent.txt
+git操作手册.txt
