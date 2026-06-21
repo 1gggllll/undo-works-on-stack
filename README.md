@@ -169,9 +169,6 @@ http://localhost:3000/api
 
 ```
 train_one/
-├── agent.txt               # AI开发指导手册（不提交）
-├── git操作手册.txt          # Git操作指南（不提交）
-├── 项目开发手册.txt         # 项目开发手册（不提交）
 ├── README.md               # 项目说明文档
 ├── package.json            # Node.js项目配置
 ├── server.js               # Express服务器入口
