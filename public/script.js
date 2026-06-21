@@ -9,6 +9,19 @@ const emptyState = document.getElementById('emptyState');
 const totalCount = document.getElementById('totalCount');
 const completedCount = document.getElementById('completedCount');
 
+// 防抖函数
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
 // 页面加载时获取所有待办事项
 document.addEventListener('DOMContentLoaded', () => {
   loadTodos();
@@ -18,6 +31,22 @@ document.addEventListener('DOMContentLoaded', () => {
   todoInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       addTodo();
+    }
+  });
+  
+  // 使用事件委托处理待办事项列表中的事件
+  todoList.addEventListener('click', (e) => {
+    const target = e.target;
+    const todoItem = target.closest('.todo-item');
+    
+    if (!todoItem) return;
+    
+    const todoId = todoItem.dataset.id;
+    
+    if (target.classList.contains('todo-checkbox')) {
+      toggleTodo(todoId, target.checked);
+    } else if (target.classList.contains('todo-delete')) {
+      deleteTodo(todoId);
     }
   });
 });
@@ -45,10 +74,12 @@ async function loadTodos() {
 
 // 渲染待办事项列表
 function renderTodos(todos) {
-  todoList.innerHTML = '';
+  // 使用DocumentFragment减少DOM重绘
+  const fragment = document.createDocumentFragment();
   
   if (todos.length === 0) {
     emptyState.style.display = 'block';
+    todoList.innerHTML = '';
     return;
   }
   
@@ -63,7 +94,6 @@ function renderTodos(todos) {
     checkbox.type = 'checkbox';
     checkbox.className = 'todo-checkbox';
     checkbox.checked = todo.completed;
-    checkbox.addEventListener('change', () => toggleTodo(todo.id, checkbox.checked));
     
     const title = document.createElement('span');
     title.className = `todo-title ${todo.completed ? 'completed' : ''}`;
@@ -76,15 +106,18 @@ function renderTodos(todos) {
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'todo-delete';
     deleteBtn.textContent = '删除';
-    deleteBtn.addEventListener('click', () => deleteTodo(todo.id));
     
     li.appendChild(checkbox);
     li.appendChild(title);
     li.appendChild(date);
     li.appendChild(deleteBtn);
     
-    todoList.appendChild(li);
+    fragment.appendChild(li);
   });
+  
+  // 一次性更新DOM
+  todoList.innerHTML = '';
+  todoList.appendChild(fragment);
 }
 
 // 更新统计信息
@@ -94,8 +127,8 @@ function updateStats(todos) {
   completedCount.textContent = `已完成: ${completed}`;
 }
 
-// 添加新待办事项
-async function addTodo() {
+// 添加新待办事项（带防抖）
+const addTodo = debounce(async function() {
   const title = todoInput.value.trim();
   
   if (!title) {
@@ -131,7 +164,7 @@ async function addTodo() {
     addButton.disabled = false;
     addButton.textContent = '添加';
   }
-}
+}, 300);
 
 // 切换待办事项状态
 async function toggleTodo(id, completed) {

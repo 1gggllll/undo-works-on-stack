@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const database = require('./database');
+const { errorHandler, validateTodoRequest, asyncHandler } = require('./middleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,56 +28,50 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 获取所有待办事项
-app.get('/api/todos', async (req, res) => {
-  try {
-    const todos = await database.getAllTodos();
-    res.json({ success: true, data: todos });
-  } catch (error) {
-    console.error('获取待办事项失败:', error);
-    res.status(500).json({ success: false, message: '获取待办事项失败' });
+// 获取所有待办事项（支持分页）
+app.get('/api/todos', asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 100;
+  
+  const result = await database.getAllTodos(page, limit);
+  res.json({ success: true, data: result.data, pagination: result.pagination });
+}));
+
+// 获取单个待办事项
+app.get('/api/todos/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const todo = await database.getTodoById(id);
+  if (todo) {
+    res.json({ success: true, data: todo });
+  } else {
+    res.status(404).json({ success: false, message: '待办事项不存在' });
   }
-});
+}));
 
 // 添加新待办事项
-app.post('/api/todos', async (req, res) => {
-  try {
-    const { title } = req.body;
-    if (!title || title.trim() === '') {
-      return res.status(400).json({ success: false, message: '标题不能为空' });
-    }
-    const newTodo = await database.addTodo(title.trim());
-    res.status(201).json({ success: true, data: newTodo });
-  } catch (error) {
-    console.error('添加待办事项失败:', error);
-    res.status(500).json({ success: false, message: '添加待办事项失败' });
-  }
-});
+app.post('/api/todos', validateTodoRequest, asyncHandler(async (req, res) => {
+  const { title } = req.body;
+  const newTodo = await database.addTodo(title);
+  res.status(201).json({ success: true, data: newTodo });
+}));
 
 // 更新待办事项状态
-app.put('/api/todos/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { completed } = req.body;
-    await database.updateTodo(id, completed);
-    res.json({ success: true, message: '更新成功' });
-  } catch (error) {
-    console.error('更新待办事项失败:', error);
-    res.status(500).json({ success: false, message: '更新待办事项失败' });
-  }
-});
+app.put('/api/todos/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { completed } = req.body;
+  await database.updateTodo(id, completed);
+  res.json({ success: true, message: '更新成功' });
+}));
 
 // 删除待办事项
-app.delete('/api/todos/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    await database.deleteTodo(id);
-    res.json({ success: true, message: '删除成功' });
-  } catch (error) {
-    console.error('删除待办事项失败:', error);
-    res.status(500).json({ success: false, message: '删除待办事项失败' });
-  }
-});
+app.delete('/api/todos/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  await database.deleteTodo(id);
+  res.json({ success: true, message: '删除成功' });
+}));
+
+// 错误处理中间件
+app.use(errorHandler);
 
 // 前端路由（所有其他请求返回 index.html）
 app.get('*', (req, res) => {

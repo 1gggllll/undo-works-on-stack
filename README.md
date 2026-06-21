@@ -176,6 +176,9 @@ train_one/
 ├── package.json            # Node.js项目配置
 ├── server.js               # Express服务器入口
 ├── database.js             # 数据库初始化与操作
+├── middleware.js            # 中间件（错误处理、验证）
+├── test/                   # 测试文件
+│   └── api.test.js         # API接口测试
 ├── public/                 # 静态前端文件
 │   ├── index.html          # 主页面
 │   ├── style.css           # 样式文件
@@ -292,6 +295,21 @@ taskkill /PID <进程ID> /F
 
 ## 测试方法
 
+### 自动化测试
+项目使用Mocha和Supertest进行API接口测试：
+
+```bash
+# 运行测试
+npm test
+
+# 测试覆盖内容：
+# - GET /api/health - 健康检查
+# - GET /api/todos - 获取待办事项列表
+# - POST /api/todos - 添加待办事项
+# - PUT /api/todos/:id - 更新待办事项状态
+# - DELETE /api/todos/:id - 删除待办事项
+```
+
 ### 手动测试
 1. 启动服务器
 2. 打开浏览器访问`http://localhost:3000`
@@ -305,13 +323,28 @@ taskkill /PID <进程ID> /F
 
 ## 性能优化
 
-### 前端优化
+### 已实现的优化
+
+#### 前端优化
+- 使用DocumentFragment减少DOM重绘
+- 实现事件委托优化事件监听器
+- 添加防抖功能防止重复提交
+- 优化渲染性能
+
+#### 后端优化
+- 添加数据库索引（completed、created_at字段）
+- 实现分页查询支持
+- 统一错误处理中间件
+- 异步路由包装器
+
+#### 数据库优化
+- 为常用查询字段添加索引
+- 支持分页查询减少数据传输
+- 优化查询语句
+
+### 进一步优化建议
 - 压缩CSS和JavaScript文件
 - 使用CDN加载第三方库
-- 实现懒加载
-
-### 后端优化
-- 添加数据库索引
 - 实现查询缓存
 - 使用连接池
 
@@ -364,6 +397,14 @@ taskkill /PID <进程ID> /F
 - 发送邮件至项目维护者
 
 ## 更新日志
+
+### v1.1.0 (2026-06-22)
+- 添加API接口自动化测试
+- 实现数据库查询优化（索引、分页）
+- 优化前端性能（事件委托、防抖、DocumentFragment）
+- 统一错误处理中间件
+- 添加请求验证中间件
+- 更新项目文档
 
 ### v1.0.0 (2026-06-22)
 - 初始版本发布

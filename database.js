@@ -39,18 +39,70 @@ function initDatabase() {
         console.log('数据库表已初始化');
       }
     });
+
+    // 添加索引以优化查询性能
+    database.run(`
+      CREATE INDEX IF NOT EXISTS idx_todos_completed ON todos(completed)
+    `, (err) => {
+      if (err) {
+        console.error('创建completed索引失败:', err.message);
+      }
+    });
+
+    database.run(`
+      CREATE INDEX IF NOT EXISTS idx_todos_created_at ON todos(created_at)
+    `, (err) => {
+      if (err) {
+        console.error('创建created_at索引失败:', err.message);
+      }
+    });
   });
 }
 
-// 获取所有待办事项
-function getAllTodos() {
+// 获取所有待办事项（支持分页）
+function getAllTodos(page = 1, limit = 100) {
   return new Promise((resolve, reject) => {
     const database = getDatabase();
-    database.all('SELECT * FROM todos ORDER BY created_at DESC', [], (err, rows) => {
+    const offset = (page - 1) * limit;
+    
+    // 获取总数
+    database.get('SELECT COUNT(*) as total FROM todos', [], (err, countResult) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      
+      // 获取分页数据
+      const sql = 'SELECT * FROM todos ORDER BY created_at DESC LIMIT ? OFFSET ?';
+      database.all(sql, [limit, offset], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({
+            data: rows,
+            pagination: {
+              page: page,
+              limit: limit,
+              total: countResult.total,
+              totalPages: Math.ceil(countResult.total / limit)
+            }
+          });
+        }
+      });
+    });
+  });
+}
+
+// 根据ID获取单个待办事项
+function getTodoById(id) {
+  return new Promise((resolve, reject) => {
+    const database = getDatabase();
+    const sql = 'SELECT * FROM todos WHERE id = ?';
+    database.get(sql, [id], (err, row) => {
       if (err) {
         reject(err);
       } else {
-        resolve(rows);
+        resolve(row || null);
       }
     });
   });
@@ -124,6 +176,7 @@ function closeDatabase() {
 module.exports = {
   initDatabase,
   getAllTodos,
+  getTodoById,
   addTodo,
   updateTodo,
   deleteTodo,
