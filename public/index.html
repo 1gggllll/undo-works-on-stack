@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>待办事项列表</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>待办事项列表</h1>
+      <p class="subtitle">全栈待办事项应用 - 学生实践项目</p>
+    </header>
+    
+    <main>
+      <!-- 添加待办事项表单 -->
+      <div class="add-todo">
+        <input type="text" id="todoInput" placeholder="输入新的待办事项..." autocomplete="off">
+        <button id="addButton">添加</button>
+      </div>
+      
+      <!-- 待办事项列表 -->
+      <div class="todo-list">
+        <div class="todo-stats">
+          <span id="totalCount">总计: 0</span>
+          <span id="completedCount">已完成: 0</span>
+        </div>
+        
+        <ul id="todoList">
+          <!-- 待办事项将通过JavaScript动态添加 -->
+        </ul>
+        
+        <div class="empty-state" id="emptyState">
+          <p>暂无待办事项</p>
+          <p>添加你的第一个待办事项吧！</p>
+        </div>
+      </div>
+    </main>
+    
+    <footer>
+      <p>全栈待办事项列表应用 &copy; 2026</p>
+    </footer>
+  </div>
+  
+  <script src="script.js"></script>
+</body>
+</html>
