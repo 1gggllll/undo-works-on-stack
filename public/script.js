@@ -38,6 +38,8 @@ async function loadTodos() {
   } catch (error) {
     console.error('加载失败:', error);
     showError('网络错误，请检查服务器是否运行');
+  } finally {
+    hideLoading();
   }
 }
 
@@ -218,7 +220,24 @@ function formatDate(dateString) {
 
 // 显示加载状态
 function showLoading() {
-  // 可以添加加载指示器
+  // 移除现有的加载指示器
+  hideLoading();
+  
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'loading-indicator';
+  loadingDiv.id = 'loadingIndicator';
+  loadingDiv.innerHTML = '<div class="loading-spinner"></div><span>加载中...</span>';
+  
+  const todoList = document.getElementById('todoList');
+  todoList.parentNode.insertBefore(loadingDiv, todoList);
+}
+
+// 隐藏加载状态
+function hideLoading() {
+  const loadingIndicator = document.getElementById('loadingIndicator');
+  if (loadingIndicator) {
+    loadingIndicator.remove();
+  }
 }
 
 // 显示错误消息
@@ -228,17 +247,22 @@ function showError(message) {
   
   const errorDiv = document.createElement('div');
   errorDiv.className = 'error-message';
-  errorDiv.textContent = message;
-  errorDiv.style.display = 'block';
+  errorDiv.innerHTML = `
+    <span class="message-text">${message}</span>
+    <button class="message-close" onclick="this.parentElement.remove()">×</button>
+  `;
+  errorDiv.style.display = 'flex';
   
   const main = document.querySelector('main');
   main.insertBefore(errorDiv, main.firstChild);
   
-  // 3秒后自动隐藏
+  // 5秒后自动隐藏
   setTimeout(() => {
-    errorDiv.style.display = 'none';
-    errorDiv.remove();
-  }, 3000);
+    if (errorDiv.parentElement) {
+      errorDiv.style.opacity = '0';
+      setTimeout(() => errorDiv.remove(), 300);
+    }
+  }, 5000);
 }
 
 // 显示成功消息
@@ -248,17 +272,22 @@ function showSuccess(message) {
   
   const successDiv = document.createElement('div');
   successDiv.className = 'success-message';
-  successDiv.textContent = message;
-  successDiv.style.display = 'block';
+  successDiv.innerHTML = `
+    <span class="message-text">${message}</span>
+    <button class="message-close" onclick="this.parentElement.remove()">×</button>
+  `;
+  successDiv.style.display = 'flex';
   
   const main = document.querySelector('main');
   main.insertBefore(successDiv, main.firstChild);
   
-  // 2秒后自动隐藏
+  // 3秒后自动隐藏
   setTimeout(() => {
-    successDiv.style.display = 'none';
-    successDiv.remove();
-  }, 2000);
+    if (successDiv.parentElement) {
+      successDiv.style.opacity = '0';
+      setTimeout(() => successDiv.remove(), 300);
+    }
+  }, 3000);
 }
 
 // 移除所有消息
